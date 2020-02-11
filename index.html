@@ -1,77 +1,134 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-   <title>Multimedia chat!</title>
-   <script src="/socket.io/socket.io.js"></script>
-   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"></link>
-   <style>
-       .newUser{
-           font-size: 12px;
-           color: black;
-       }
-       .userLeft{
-           font-size: 12px;
-           color: red;
-       }
-       ul{
-           list-style: none;
-       }
-       .mainChatContainer{
-           padding:10px
-       }
-       #inp{
-           outline: none;
-           background: white;
-           color: black;
-           width: 100%;
-           height: 50px;
-           padding:20px;
-           border: none;
-           box-shadow: 0 0 10px 0 rgba(30, 28, 28, 0.27);
-       }
-       #submit{
+    <title>Multimedia chat!</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    </link>
+    <style>
+        .newUser {
+            font-size: 12px;
+            color: black;
+        }
+
+        .userLeft {
+            font-size: 12px;
+            color: red;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .mainChatContainer {
+            display: none;
+            padding: 10px;
+            margin:10px 0 0 0;
+        }
+
+        #inp {
+            outline: none;
+            background: white;
+            color: black;
+            width: 100%;
+            height: 50px;
+            padding: 20px;
+            border: none;
+            box-shadow: 0 0 10px 0 rgba(30, 28, 28, 0.27);
+        }
+
+        #submit {
             margin-top: 20px;
-            width:150px;
+            width: 150px;
             text-align: center;
-            border:none;
+            border: none;
             box-shadow: 0 0 10px 0 rgba(30, 28, 28, 0.27);
             height: 50px;
             color: white;
             background-color: #4fc08d;
-       }
-       .users{
-           margin:20px 0 0 0;
-           padding: 0;
-           list-style: none;
-       }
-       .chatUser{
-           font-size: 12px;
-           color: white;
-       }
-       .userChatContainer{  
-           width: 70%;
-           display: inline-block;
-           background: #4fc08d;
-           padding:10px;
-           border-radius: 10px;
-           margin:10px;
-       }
-       #messages{
-           display: inline-block;
-           width: 100%;
-       }
-       .myChat{
-           float: right;
-       }
-   </style>
+        }
+
+        .users {
+            margin: 20px 0 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .chatUser {
+            font-size: 12px;
+            color: white;
+        }
+
+        .userChatContainer {
+            width: 70%;
+            display: inline-block;
+            background: #4fc08d;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px;
+        }
+
+        #messages {
+            display: inline-block;
+            width: 100%;
+        }
+
+        .myChat {
+            float: right;
+        }
+
+        #askUserName {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            overflow: hidden;
+        }
+
+        .centeredContainer {
+            text-align: center;
+            width: 90%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #username {
+            outline: none;
+            background: white;
+            color: black;
+            width: 80%;
+            height: 50px;
+            padding: 20px;
+            border: none;
+            box-shadow: 0 0 10px 0 rgba(30, 28, 28, 0.27);
+        }
+
+        .mini-container {
+            position: relative;
+            height: 100%;
+        }
+    </style>
 </head>
+
 <body>
     <div id="askUserName">
+        <div class="row container-fluid mini-container">
+            <div class="centeredContainer">
+                <input type="text" id="username" placeholder="Type Your Name"
+                    onkeydown="handleInititalUserName(event)" />
+                <br />
+                <small>
+                    Press Enter To Submit
+                </small>
+            </div>
+        </div>
     </div>
     <div class="row container-fluid mainChatContainer">
         <div class="col-6">
-            <input type='text' placeholder="Message" id='inp' onkeydown="handleKeyPressDown(event)"/>
+            <input type='text' placeholder="Message" id='inp' onkeydown="handleKeyPressDown(event)" />
             <button id="submit" onclick="sendMsg()" type="submit">Send</button>
             <ul class="users">
             </ul>
@@ -81,71 +138,78 @@
             </ul>
         </div>
     </div>
-<script>
-    let socket, name, userid;
-    let handleJoinUser =name=>{
-        $('.users').append(`
+    <script>
+        let socket, name, userid;
+        let handleJoinUser = name => {
+            $('.users').append(`
             <li class="newUser">${name} Joined The Chat</li>
         `);
-    }
-    let handleUserChat =user=>{
-        let {name, text} = user;
-        console.log("user.userid===userid ", user.userid===userid)
-        if(user.userid===userid){
-            $('#messages').append(`
-                <li class="userChatContainer myChat">
-                    <span class="chatUser">
-                        ${name}
-                    </span>
-                    <br/>
-                    <span class="userChat">
-                        ${text}
-                    </span>
-                </li>
-            `);
-        }else{
-            $('#messages').append(`
-                <li class="userChatContainer ">
-                    <span class="chatUser">
-                        ${name}
-                    </span>
-                    <br/>
-                    <span class="userChat">
-                        ${text}
-                    </span>
-                </li>
-            `);
         }
-    }
-    let sendMsg=()=>{
-        let text = document.querySelector('#inp').value;
-        socket.emit('message', {name, text, userid})
-        document.querySelector('#inp').value = "";
-    }
-    let handleKeyPressDown=event=>{
-        if(event.keyCode===13){
-            sendMsg();
+        let handleUserChat = user => {
+            let { name, text } = user;
+            if(text){
+                if (user.userid === userid) {
+                        $('#messages').append(`
+                    <li class="userChatContainer myChat">
+                        <span class="chatUser">
+                            ${name}
+                        </span>
+                        <br/>
+                        <span class="userChat">
+                            ${text}
+                        </span>
+                    </li>
+                    `);
+                    } else {
+                        $('#messages').append(`
+                    <li class="userChatContainer ">
+                        <span class="chatUser">
+                            ${name}
+                        </span>
+                        <br/>
+                        <span class="userChat">
+                            ${text}
+                        </span>
+                    </li>
+                `);
+                }
+            }
         }
-    }
-    let handleLeaveUser=name=>{
-        $('.users').append(`
+        let sendMsg = () => {
+            let text = document.querySelector('#inp').value;
+            socket.emit('message', { name, text, userid })
+            document.querySelector('#inp').value = "";
+        }
+        let handleKeyPressDown = event => {
+            if (event.keyCode === 13) {
+                sendMsg();
+            }
+        }
+        let handleInititalUserName = event => {
+            let userInputValue = document.querySelector('#username').value;
+            if (event.keyCode === 13 && userInputValue) {
+                name = userInputValue;
+                document.getElementsByClassName('mainChatContainer')[0].style.display = "flex";
+                document.getElementById('askUserName').style.display = "none";
+                socket.emit('join', name);
+            }
+        }
+        let handleLeaveUser = name => {
+            $('.users').append(`
             <li class="userLeft">${name} Left</li>
         `);
-    }
-    $(document).ready(function () {
-        name = prompt('Hey, Whats your good name?'|| 'User');
-        userid = Math.random();
-        socket = io();
-        socket.on('connect', () => {
-            socket.emit('join', name);
-        })
-
-
-        socket.on('join', handleJoinUser);
-        socket.on('message', handleUserChat);
-        socket.on('leave', handleLeaveUser);
-    });
-</script>
+        }
+        $(document).ready(function () {
+            userid = Math.random();
+            socket = io();
+            socket.on('connect', () => {
+                socket.on('join', handleJoinUser);
+                socket.on('message', handleUserChat);
+                socket.on('leave', handleLeaveUser);
+            })
+        });
+    </script>
 
 </body>
+
 </html>
