@@ -146,31 +146,32 @@
         }
         let handleUserChat = user => {
             let { name, text } = user;
-            console.log("user.userid===userid ", user.userid === userid)
-            if (user.userid === userid) {
-                $('#messages').append(`
-                <li class="userChatContainer myChat">
-                    <span class="chatUser">
-                        ${name}
-                    </span>
-                    <br/>
-                    <span class="userChat">
-                        ${text}
-                    </span>
-                </li>
-            `);
-            } else {
-                $('#messages').append(`
-                <li class="userChatContainer ">
-                    <span class="chatUser">
-                        ${name}
-                    </span>
-                    <br/>
-                    <span class="userChat">
-                        ${text}
-                    </span>
-                </li>
-            `);
+            if(text){
+                if (user.userid === userid) {
+                        $('#messages').append(`
+                    <li class="userChatContainer myChat">
+                        <span class="chatUser">
+                            ${name}
+                        </span>
+                        <br/>
+                        <span class="userChat">
+                            ${text}
+                        </span>
+                    </li>
+                    `);
+                    } else {
+                        $('#messages').append(`
+                    <li class="userChatContainer ">
+                        <span class="chatUser">
+                            ${name}
+                        </span>
+                        <br/>
+                        <span class="userChat">
+                            ${text}
+                        </span>
+                    </li>
+                `);
+                }
             }
         }
         let sendMsg = () => {
@@ -189,6 +190,7 @@
                 name = userInputValue;
                 document.getElementsByClassName('mainChatContainer')[0].style.display = "block";
                 document.getElementById('askUserName').style.display = "none";
+                socket.emit('join', name);
             }
         }
         let handleLeaveUser = name => {
@@ -197,15 +199,13 @@
         `);
         }
         $(document).ready(function () {
-            name = document.querySelector('#username').value;
             userid = Math.random();
             socket = io();
             socket.on('connect', () => {
-                socket.emit('join', name);
+                socket.on('join', handleJoinUser);
+                socket.on('message', handleUserChat);
+                socket.on('leave', handleLeaveUser);
             })
-            socket.on('join', handleJoinUser);
-            socket.on('message', handleUserChat);
-            socket.on('leave', handleLeaveUser);
         });
     </script>
 
