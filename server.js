@@ -9,11 +9,11 @@ app.get('/', (req, res) => {
 
 io.on('connection', socket=>{
     socket.on('disconnect', ()=>{
-        io.emit('leave', socket.name);
+        socket.broadcast.emit('leave', socket.name);
     })
     socket.on('join',name=>{
-        socket.name = name
-        io.emit('join', name)
+        socket.name = name;
+        socket.broadcast.emit('join', name);
     })
     socket.on('message', user=>{
         io.emit('message', user)
